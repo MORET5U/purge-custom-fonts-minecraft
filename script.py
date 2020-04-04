@@ -116,11 +116,8 @@ async def main():
 
     for archive, archive_path in ARCHIVES:
         asyncio.create_task(exclude_fonts_from_archive(archive_path, archive))
+        await asyncio.sleep(0.1)
 
-    input(
-        "\nПроцесс завершён, нажмите ВВОД (ENTER), чтобы закрыть программу..." if LOCALE in CYRILLIC_LOCALES
-        else "\nThe process is complete, press ENTER to close the program..."
-    )
 
 loop = asyncio.get_event_loop()
 loop.run_until_complete(main())
