@@ -10,9 +10,19 @@ import os
 import asyncio
 import sys
 
+__author__ = "runic-tears"
+__credits__ = ["runic-tears"]
+__license__ = "MIT"
+__version__ = "a1.0.2"
+__maintainer__ = "runic-tears"
+__status__ = "Production"
+
+
+CYRILLIC_LOCALES = ("ru_RU", "uk_UA")
 STARTED_AT = datetime.now().strftime('%d-%m-%Y %H-%M-%S')
 DIRECTORIES = []
 ARCHIVES = []
+
 
 WINDLL = ctypes.windll.kernel32 \
     if platform.system() == "Windows" else None
@@ -43,6 +53,17 @@ async def exclude_fonts_from_archive(archive_path, archive_name):
 
         zout.close()
 
+        print(
+            f"* {archive_name} успешно обработан!" if LOCALE in CYRILLIC_LOCALES
+            else f"* {archive_name} successfully processed!"
+        )
+
+    else:
+        print(
+            f"[!] Кастомные шрифты в ресурспаке {archive_name} не найдены, обработка отменена." if LOCALE in CYRILLIC_LOCALES
+            else f"[!] There are no custom fonts in {archive_name}, skipped."
+        )
+
     zin.close()
 
 
@@ -67,12 +88,12 @@ async def main():
 
     if len(ARCHIVES) <= 0:
         return print(
-            "Файлов для обработки не найдено." if LOCALE in ("ru_RU", "uk_UA")
+            "Файлов для обработки не найдено." if LOCALE in CYRILLIC_LOCALES
             else "Nothing will get processed, since no packs were found"
         )
 
     print(
-        "Файлы, которые будут подвергнуты обработке:" if LOCALE in ("ru_RU", "uk_UA")
+        "Файлы, которые будут подвергнуты обработке:" if LOCALE in CYRILLIC_LOCALES
         else "Files that will be processed:"
     )
 
@@ -80,24 +101,21 @@ async def main():
         print(f"- {archive}")
 
     IS_USER_SURE = input(
-        "\nВы уверены, что хотите обработать выше указанные файлы? (да / нет): " if LOCALE in ("ru_RU", "uk_UA")
+        "\nВы уверены, что хотите обработать выше указанные файлы? (да / нет): " if LOCALE in CYRILLIC_LOCALES
         else "\nAre you sure that you want to process these files? (yes / no): "
     )
 
     print("")
 
     if IS_USER_SURE.lower() not in ("yes", "y", "да"):
-        return
+        print(
+            "\nВы отменили процесс.\n" if LOCALE in CYRILLIC_LOCALES
+            else "\nYou have cancelled the process.\n"
+        )
+        return await asyncio.sleep(5)
 
     for archive, archive_path in ARCHIVES:
-        asyncio.ensure_future(
-            exclude_fonts_from_archive(archive_path, archive)
-        )
-
-        print(
-            f"* {archive} обрабатывается..." if LOCALE in ("ru_RU", "uk_UA")
-            else f"* {archive} being processed..."
-        )
+        asyncio.create_task(exclude_fonts_from_archive(archive_path, archive))
 
 
 loop = asyncio.get_event_loop()
